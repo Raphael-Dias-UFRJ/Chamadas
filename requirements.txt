@@ -1,0 +1,10 @@
+streamlit
+st-gsheets-connection
+pyufbr==0.1.0
+numpy==1.26.3
+pandas
+streamlit_authenticator==0.3.3
+pickle-mixin==1.pip install -r requirements.txt0.2
+gspread
+oauth2client
+plotly

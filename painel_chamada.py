@@ -42,11 +42,10 @@ num_aulas = st.number_input(
 df = conn.read(worksheet=class_name)
 df.columns = [c.strip().lower() for c in df.columns]
 
+# Filtra apenas alunos ativos
+df = df[df['ativo'].str.lower() != 'n']
+
 st.subheader(f"Turma: {class_name} – {call_date} ({num_aulas} aula(s))")
-
-
-# Padroniza nomes de colunas
-df.columns = [c.strip().lower() for c in df.columns]
 
 # ------------- CHAMADA ------------------
 records = []
@@ -71,16 +70,15 @@ if st.button("💾 Salvar chamada"):
 
     df_full = conn.read(worksheet=class_name)
     df_full.columns = [c.strip().lower() for c in df_full.columns]
+    
+    # Filtra apenas alunos ativos para salvamento
+    df_full_active = df_full[df_full['ativo'].str.lower() != 'n']
 
     for i in range(num_aulas):
         col_name = f"{base_date} ({i+1})"
 
-        # Se a coluna não existir, cria (temporariamente inativo, pois quero criar mais)
-        '''if col_name not in df_full.columns:
-            df_full[col_name] = ""'''
-
-        # Salva os registros nesta coluna
-        df_full[col_name] = records
+        # Salva os registros apenas para alunos ativos
+        df_full.loc[df_full_active.index, col_name] = records
 
     conn.update(
         worksheet=class_name,

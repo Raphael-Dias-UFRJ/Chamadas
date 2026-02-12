@@ -60,6 +60,7 @@ all_stats = []
 
 for turma in CLASS_NAMES:
     df = conn.read(worksheet=turma)
+    df = df[df['ativo'].str.lower() != 'n']
     df.columns = [c.strip().lower() for c in df.columns]
 
     stats = count_by_student(df)
@@ -101,6 +102,7 @@ alert_rows = []
 
 for turma in CLASS_NAMES:
     df = conn.read(worksheet=turma)
+    df = df[df['ativo'].str.lower() != 'n']
     df.columns = [c.strip().lower() for c in df.columns]
 
     date_cols = df.columns[4:]
@@ -139,6 +141,7 @@ df_bi = conn.read(worksheet=BIMESTER_SHEET)
 df_bi.columns = [c.strip().lower() for c in df_bi.columns]
 
 df = conn.read(worksheet=turma_sel)
+df = df[df['ativo'].str.lower() != 'n']
 df.columns = [c.strip().lower() for c in df.columns]
 
 date_cols = df.columns[4:]

@@ -16,6 +16,7 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 turma_sel = st.selectbox("🏫 Selecione a turma", CLASS_NAMES)
 
 df = conn.read(worksheet=turma_sel)
+df = df[df['ativo'].str.lower() != 'n']
 df.columns = [c.strip().lower() for c in df.columns]
 
 # Colunas de datas (a partir da 5ª coluna)

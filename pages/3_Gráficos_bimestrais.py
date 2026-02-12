@@ -52,6 +52,7 @@ dados_graficos = []
 
 for turma in CLASS_NAMES:
     df = conn.read(worksheet=turma)
+    df = df[df['ativo'].str.lower() != 'n']
     df.columns = [c.strip().lower() for c in df.columns]
 
     percentuais = calcular_percentuais_por_turma(turma, df)

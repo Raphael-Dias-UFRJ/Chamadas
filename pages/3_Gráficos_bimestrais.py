@@ -18,7 +18,10 @@ OCCURRENCE_CODES = {
     "Celular": "cel",
     "Conversa": "con",
     "Agressividade": "ag",
-    "Dormindo": "dorm"
+    "Dormindo": "dorm",
+    "Circulacao": "circ",
+    "Improdutivo": "imp",
+    "Dificuldade": "dif"
 }
 
 conn = st.connection("gsheets", type=GSheetsConnection)
@@ -72,9 +75,13 @@ st.bar_chart(df_graficos.set_index("Turma")["Falta"])
 st.subheader("🚨 Percentual de Registros de Agressividade por Turma")
 st.bar_chart(df_graficos.set_index("Turma")["Agressividade"])
 
-# -------- Gráfico 3 - Comparativo geral de ocorrências --------
+# -------- Gráfico 3 - % de rendimento por turma --------
+st.subheader("✅ Percentual de Registros de Rendimento por Turma")
+st.bar_chart(df_graficos.set_index("Turma")["Rendimento"])
+
+# -------- Gráfico 4 - Comparativo geral de ocorrências --------
 st.subheader("📌 Comparativo Geral de Ocorrências por Turma")
-st.bar_chart(df_graficos.set_index("Turma")[["Celular", "Conversa", "Dormindo"]])
+st.bar_chart(df_graficos.set_index("Turma")[["Celular", "Conversa", "Dormindo", "Circulacao", "Improdutivo", "Dificuldade", "Agressividade"]])
 
 # -------- Tabela resumo --------
 st.subheader("📋 Tabela Resumo de Percentuais por Turma")

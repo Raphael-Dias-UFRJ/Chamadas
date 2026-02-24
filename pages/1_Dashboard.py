@@ -12,7 +12,10 @@ OCC_CODES = {
     "ag": "Agressividade",
     "dorm": "Dormindo",
     "ok": "Rendimento",
-    "circ": "Circulação"
+    "circ": "Circulação",
+    "imp": "Improdutivo",
+    "dif": "Dificuldade"
+    
 
 }
 
@@ -42,7 +45,7 @@ def count_by_student(df):
 
     for _, row in df.iterrows():
         name = row["nome"]
-        student_stats[name] = {"f": 0, "cel": 0, "con": 0, "ag": 0, "dorm": 0, "ok": 0, "circ": 0}
+        student_stats[name] = {"f": 0, "cel": 0, "con": 0, "ag": 0, "dorm": 0, "ok": 0, "circ": 0, "imp": 0, "dif": 0}
 
         for col in df.columns[4:]:
             cell = str(row[col])
@@ -156,7 +159,7 @@ for _, row in df.iterrows():
     faltas = 0
     presencas = 0
 
-    occ_count = {"ok": 0, "cel": 0, "con": 0, "ag": 0, "dorm": 0}
+    occ_count = {"ok": 0, "cel": 0, "con": 0, "ag": 0, "dorm": 0, "circ": 0, "imp": 0, "dif": 0}
 
     for col in date_cols:
         ocorrencias = str(row[col]).split(";")
@@ -178,6 +181,9 @@ for _, row in df.iterrows():
         "% conversa": round((occ_count["con"] / presencas) * 100, 2) if presencas > 0 else 0,
         "% agressividade": round((occ_count["ag"] / presencas) * 100, 2) if presencas > 0 else 0,
         "% dormindo": round((occ_count["dorm"] / presencas) * 100, 2) if presencas > 0 else 0,
+        "% circulação": round((occ_count["circ"] / presencas) * 100, 2) if presencas > 0 else 0,
+        "% improdutivo": round((occ_count["imp"] / presencas) * 100, 2) if presencas > 0 else 0,
+        "% dificuldade": round((occ_count["dif"] / presencas) * 100, 2) if presencas > 0 else 0
     }
 
     rows.append({

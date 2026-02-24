@@ -14,7 +14,9 @@ OCCURRENCES = {
     "Conversa": "con",
     "Agressividade": "ag",
     "Dormindo": "dorm",
-    "Circulacao": "circ"
+    "Circulacao": "circ",
+    "Improdutivo": "imp",
+    "Dificuldade": "dif",
 }
 
 # Nome das turmas disponíveis == Nomes das abas na planilha

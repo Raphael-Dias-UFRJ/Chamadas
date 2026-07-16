@@ -106,7 +106,13 @@ for idx, row in df.iterrows():
         student_occurrences = []
 
         for col, (label, code) in zip(cols, OCCURRENCES.items()):
-            if col.checkbox(label, key=f"{class_name}_{idx}_{label}"):
+            # "Presença" já começa marcada por padrão
+            is_checked = col.checkbox(
+                label,
+                value=(label == "Presença"),
+                key=f"{class_name}_{idx}_{label}"
+            )
+            if is_checked:
                 student_occurrences.append(code)
 
         records.append(";".join(student_occurrences))

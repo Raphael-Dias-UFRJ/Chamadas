@@ -89,14 +89,10 @@ with st.container(border=True):
         key="tipo_aula"
     )
 
-# ------------- CÁLCULOS PARA DADOS_AULAS -----------
-# Calcular número de alunos presentes
-presentes = sum(1 for record in records if 'p' in record.lower())
-
-# Calcular percentual de presença
-total_alunos = len(df)
-percentual_presenca = (presentes / total_alunos * 100) if total_alunos > 0 else 0
-
+    obs = st.text_area(
+        "� Observações",
+        key="obs"
+    )
 
 # ------------- CHAMADA ------------------
 st.markdown("### 📌 Registro de Presença")
@@ -115,6 +111,13 @@ for idx, row in df.iterrows():
 
         records.append(";".join(student_occurrences))
 
+# ------------- CÁLCULOS PARA DADOS_AULAS -----------
+# Calcular número de alunos presentes
+presentes = sum(1 for record in records if 'p' in record.lower())
+
+# Calcular percentual de presença
+total_alunos = len(df)
+percentual_presenca = (presentes / total_alunos * 100) if total_alunos > 0 else 0
 
 # ------------- SALVAR NA PLANILHA -----------
 
@@ -146,7 +149,7 @@ if st.button("💾 Salvar chamada e dados da aula"):
         # Se a aba não existe, criar com as colunas necessárias
         df_dados_aulas = pd.DataFrame(columns=[
             "DATA", "TURMA", "ALUNOS_PRESENTES", "PERCENTUAL_PRESENÇA",
-            "NÍVEL_PLAN", "TIPO", "SATISFAÇÃO"
+            "NÍVEL_PLAN", "TIPO", "SATISFAÇÃO", "OBSERVAÇÕES"
         ])
 
     # Criar novo registro
@@ -157,7 +160,8 @@ if st.button("💾 Salvar chamada e dados da aula"):
         "PERCENTUAL_PRESENÇA": f"{percentual_presenca:.1f}%",
         "NÍVEL_PLAN": nivel_planejamento,
         "TIPO": "; ".join(tipo_aula) if tipo_aula else "",
-        "SATISFAÇÃO": satisfacao
+        "SATISFAÇÃO": satisfacao,
+        "OBSERVAÇÕES": obs
     }
 
     # Adicionar novo registro ao dataframe

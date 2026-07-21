@@ -141,7 +141,16 @@ if st.button("💾 Salvar chamada e dados da aula"):
     col_name = base_date
 
     # Salva os registros apenas para os alunos exibidos (mesma ordem que `df`)
-    df_full.loc[df.index, col_name] = records
+    # Se o aluno não estiver presente, salva 'f' para falta em vez das notas
+    save_values = []
+    for i in range(len(records)):
+        try:
+            presente = presences[i]
+        except IndexError:
+            presente = True
+        save_values.append(records[i] if presente else "f")
+
+    df_full.loc[df.index, col_name] = save_values
 
     conn.update(
         worksheet=class_name,

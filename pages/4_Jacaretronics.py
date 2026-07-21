@@ -140,8 +140,8 @@ if st.button("💾 Salvar chamada e dados da aula"):
 
     col_name = base_date
 
-    # Salva os registros apenas para alunos ativos
-    df_full.loc[df_full_active.index, col_name] = records
+    # Salva os registros apenas para os alunos exibidos (mesma ordem que `df`)
+    df_full.loc[df.index, col_name] = records
 
     conn.update(
         worksheet=class_name,

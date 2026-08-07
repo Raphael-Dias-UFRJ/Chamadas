@@ -40,14 +40,14 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 # ------------- SELEÇÕES -----------------
 call_date = st.date_input("📅 Data da chamada", date.today())
 class_name = "Jacaretronics" # Nome fixo da aba para Jacarétronics
-class_turno = st.multiselect("Turno", ["Manhã", "Tarde"])
+class_turno = st.selectbox("Turno", ["Manhã", "Tarde"])
 
 # ------------- LEITURA DA ABA -----------
 df = conn.read(worksheet=class_name)
 df.columns = [c.strip().lower() for c in df.columns]
 
 # Filtra apenas alunos ativos e do turno selecionado
-df = df[(df['ativo'].str.lower() != 'n') & (df['turno'].str.lower().isin([turno.lower() for turno in class_turno]))]
+df = df[(df['ativo'].str.lower() != 'n') & (df['turno'].str.lower() == class_turno.lower())]
 
 st.subheader(f"{class_name} – {call_date}")
 
@@ -87,36 +87,88 @@ with st.container(border=True):
 
 # ------------- CHAMADA ------------------
 st.markdown("### 📌 Registro de Presença")
+st.caption("Busque o nome do aluno para abrir apenas o bloco de registro dele e evitar alterações acidentais nos demais.")
 records = []
 presences = []
 categories = list(OCCURRENCES.keys())
 
 for idx, row in df.iterrows():
-    with st.container(border=True):
-        st.markdown(f"**{row['código']} – {row['nome']}**")
+    present_key = f"{class_name}_{idx}_present"
+    if present_key not in st.session_state:
+        st.session_state[present_key] = True
 
+    for i, _ in enumerate(categories):
+        rating_key = f"{class_name}_{idx}_cat_{i}"
+        if rating_key not in st.session_state:
+            st.session_state[rating_key] = 0
+
+search_term = st.text_input(
+    "🔎 Buscar aluno pelo nome",
+    placeholder="Digite parte do nome",
+    key="buscar_aluno_jacaretronics"
+).strip().lower()
+
+filtered_df = df.copy()
+if search_term:
+    filtered_df = filtered_df[filtered_df['nome'].fillna('').str.lower().str.contains(search_term, na=False)]
+
+if filtered_df.empty:
+    st.info("Nenhum aluno encontrado com esse nome.")
+    st.stop()
+
+student_options = []
+student_lookup = {}
+for _, row in filtered_df.iterrows():
+    label = f"{row['código']} – {row['nome']}"
+    student_lookup[label] = row
+    student_options.append(label)
+
+selected_label = st.selectbox(
+    "👤 Selecione o aluno",
+    student_options,
+    key="aluno_selecionado_jacaretronics"
+)
+selected_row = student_lookup[selected_label]
+selected_idx = selected_row.name
+
+for _, row in df.iterrows():
+    if row.name != selected_idx:
+        continue
+
+    with st.expander(f"🧑‍🎓 Registro de {row['nome']}", expanded=True):
+        present_key = f"{class_name}_{row.name}_present"
         present = st.checkbox(
             "Presente",
-            value=True,
-            key=f"{class_name}_{idx}_present"
+            value=st.session_state[present_key],
+            key=present_key
         )
-        presences.append(present)
 
         cols = st.columns(len(categories))
         ratings = []
         for i, label in enumerate(categories):
+            rating_key = f"{class_name}_{row.name}_cat_{i}"
             rating = cols[i].slider(
                 label,
                 min_value=0,
                 max_value=5,
-                value=0,
+                value=st.session_state[rating_key],
                 step=1,
-                key=f"{class_name}_{idx}_cat_{i}"
+                key=rating_key
             )
             ratings.append(str(rating))
 
-        # Armazena as notas na ordem das categorias, separadas por vírgula
-        records.append(",".join(ratings))
+# Monta os registros completos na ordem original do dataframe
+for _, row in df.iterrows():
+    present_key = f"{class_name}_{row.name}_present"
+    present = st.session_state.get(present_key, True)
+    presences.append(present)
+
+    ratings = []
+    for i, _ in enumerate(categories):
+        rating_key = f"{class_name}_{row.name}_cat_{i}"
+        ratings.append(str(st.session_state.get(rating_key, 0)))
+
+    records.append(",".join(ratings))
 
 # ------------- CÁLCULOS PARA DADOS_AULAS -----------
 # Calcular número de alunos presentes (com base no checkbox 'Presente')
@@ -138,7 +190,9 @@ if st.button("💾 Salvar chamada e dados da aula"):
     # Filtra apenas alunos ativos para salvamento
     df_full_active = df_full[df_full['ativo'].str.lower() != 'n']
 
-    col_name = base_date
+    # Usar coluna distinta por turno para evitar sobrescrita (ex: 2026-07-21_manha)
+    turno_slug = class_turno.lower().replace("ã","a").replace(" ","_")
+    col_name = f"{base_date}_{turno_slug}"
 
     # Salva os registros apenas para os alunos exibidos (mesma ordem que `df`)
     # Se o aluno não estiver presente, salva 'f' para falta em vez das notas
@@ -164,7 +218,7 @@ if st.button("💾 Salvar chamada e dados da aula"):
     except:
         # Se a aba não existe, criar com as colunas necessárias
         df_dados_aulas = pd.DataFrame(columns=[
-            "DATA", "TURMA", "ALUNOS_PRESENTES", "PERCENTUAL_PRESENÇA",
+            "DATA", "TURMA", "TURNO", "ALUNOS_PRESENTES", "PERCENTUAL_PRESENÇA",
             "NÍVEL_PLAN", "TIPO", "SATISFAÇÃO", "OBSERVAÇÕES"
         ])
 
@@ -172,6 +226,7 @@ if st.button("💾 Salvar chamada e dados da aula"):
     novo_registro = {
         "DATA": base_date,
         "TURMA": class_name,
+        "TURNO": class_turno,
         "ALUNOS_PRESENTES": presentes,
         "PERCENTUAL_PRESENÇA": f"{percentual_presenca:.1f}%",
         "NÍVEL_PLAN": nivel_planejamento,
